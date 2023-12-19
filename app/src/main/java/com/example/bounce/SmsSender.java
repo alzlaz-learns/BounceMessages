@@ -14,8 +14,8 @@ import java.net.UnknownHostException;
 
 public class SmsSender extends Worker {
 
-    public static final String TARGET_IP = "10.0.2.2";
-    public static final int TARGET_PORT = 8081;
+    private static final String TARGET_IP = "10.0.2.2";
+    private static final int TARGET_PORT = 8081;
 
     public static final String TAG = "SmsSender";
     public SmsSender(@NonNull Context context, @NonNull WorkerParameters workerParams) {
