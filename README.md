@@ -27,3 +27,19 @@ things. It currently handles 2 user inputs quit and send. quit is straight forwa
 shut things down. send comes in the format of <send> <phone number string> <message string> which is
 then split and put into an queue that is of Pair<String, string> (phonenumber, message) and when a connection
 is made it is sent to the app as a string displayed in logcat.
+
+12/2023 3rd major push
+
+Essentially a skeleton of the idea works 
+
+From an android app you can either send a received text message to a desktop 
+this is done with the an BroadcastReceiver which we have to extract the appropriate data
+then parse it and send it over a tcp connection over which is then parsed and displayed on the desktop client
+
+To receive messages from the desktop client you need to listen to websocket connection which just sends
+a notification to open a tcp connection to get the data which needs to be parsed and then sent to whatever target number.
+to open the websocket connection it is a manual button press. 
+
+this was in general a learning project to see how some different technologies work and explore what other
+things i can do from android studio other than basic simple stuff i experienced from classes. For the future
+I will spend time cleaning and refactoring code so it can be more readable, usable, and interchangeable.

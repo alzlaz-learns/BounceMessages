@@ -16,7 +16,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -28,6 +30,7 @@ public class WebSocketReceiver extends Service {
     private String TAG = "WebSocketReciever";
     private WebSocket ws;
 
+    private Map<String, String> phoneNumberToMessageMap = new HashMap<>();
     private static final String TARGET_IP = "10.0.2.2";
     private static final int TARGET_PORT = 8081;
     @Override
@@ -92,6 +95,7 @@ public class WebSocketReceiver extends Service {
             @Override
             public void run() {
                 try (Socket socket = new Socket(TARGET_IP, TARGET_PORT)) {
+
                     Log.d(TAG, "TCP Connection established");
                     readDataFromTcpConnection(socket);
                 } catch (IOException e) {
@@ -103,42 +107,23 @@ public class WebSocketReceiver extends Service {
 
     private void readDataFromTcpConnection(Socket socket) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
-            Log.d(TAG, "Reading data from TCP connection");
-            String message;
-            while ((message = reader.readLine()) != null) {
-                Log.d(TAG, "Message received from server: " + message);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                processLine(line);
             }
         } catch (IOException e) {
             Log.e(TAG, "Error reading from TCP connection: " + e.getMessage());
         }
     }
 
-//    private void receiveMessageFromServer(){
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Log.d(TAG , "Network thread running");
-//                try (Socket testSocket = new Socket(TARGET_IP, TARGET_PORT)) {
-//
-//                    try(InputStream in = testSocket.getInputStream()){
-//                        Log.d(TAG, "Attempting to connect to server");
-//                        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-//
-//                        Log.d(TAG, "Attempting to read from server");
-//                        String message;
-//                        while ((message = reader.readLine()) != null) {
-//                            Log.d(TAG, "Message received from server: " + message);
-//                            if(message.equals("OpenTcpConnection")){
-//
-//                            }
-//                        }
-//                    }
-//                } catch (UnknownHostException e) {
-//                    Log.e(TAG, "Server not found: " + e.getMessage());
-//                } catch (IOException e) {
-//                    Log.e(TAG, "I/O error: " + e.getMessage());
-//                }
-//            }
-//        }).start();
-//    }
+    private void processLine(String line) {
+        String[] parts = line.split(" ", 2);
+        if (parts.length == 2) {
+            String phoneNumber = parts[0];
+            String message = parts[1];
+            phoneNumberToMessageMap.put(phoneNumber, message);
+            SMSHandler smsHandler = new SMSHandler();
+            smsHandler.sendSMS(phoneNumber, message);
+        }
+    }
 }
